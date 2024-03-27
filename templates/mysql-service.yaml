@@ -1,0 +1,17 @@
+{{ if .Values.mysql.create }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mlflow.fullname" . }}-mysql
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mlflow.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+      protocol: TCP
+      name: dbapi
+  selector:
+    db: mysql
+{{ end }}

@@ -1,0 +1,84 @@
+# Default values for mlflow.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+mlflowPort: "8080"
+# cloud domain으로 생성한 도메인 추가(ex: example.com)
+dns: example.com
+# 생성한 고정 IP의 이름
+externalIp: mlflow-ingress-ip
+
+image:
+  # Dockerfile로 빌드한 이미지 repository
+  repository: mlflow
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+secret:
+  create: true
+  annotations: {}
+  name: ""
+  # minio access key, secret key
+  minio:
+    accesskey: accesskey
+    secretkey: secretkey
+  # mysql username, password
+  mysql:
+    username: username
+    password: username
+
+minio:
+  # minio endpoint
+  endpoint: http://minio-service.kubeflow.svc.cluster.local:9000
+  # minio bucket, 없으면 자동으로 생성
+  bucket: mlflow
+mysql:
+  # mysql deploy 생성 여부
+  create: false
+  # 외부 mysql host
+  endpoint: "10.175.0.11"
+  port: "3306"
+  # mysql db, 없어도 자동으로 생성하지 않음
+  db: mlflow
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+istio:
+  # istio를 사용하는 경우 VirtualService, AuthorizationPolicy 생성
+  enabled: false
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

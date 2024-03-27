@@ -1,0 +1,76 @@
+{{ if .Values.mysql.create }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mlflow.fullname" . }}-mysql
+  namespace: {{ .Release.Namespace }}
+  labels:
+    db: mysql
+    {{- include "mlflow.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      db: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        db: mysql
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0.29
+          args:
+            - --datadir
+            - /var/lib/mysql/datadir
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mlflow.secretName" . }}-mysql
+                  key: password
+            - name: MYSQL_ALLOW_EMPTY_PASSWORD
+              value: "true"
+            - name: MYSQL_DATABASE
+              value: {{ .Values.mysql.db }}
+          ports:
+            - name: dbapi
+              containerPort: 3306
+          readinessProbe:
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "mysql -D ${MYSQL_DATABASE} -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 10
+          startupProbe:
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+            periodSeconds: 15
+            failureThreshold: 60
+          volumeMounts:
+            - name: {{ include "mlflow.fullname" . }}-mysql
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: {{ include "mlflow.fullname" . }}-mysql
+          persistentVolumeClaim:
+            claimName: {{ include "mlflow.fullname" . }}-mysql
+{{ end }}
