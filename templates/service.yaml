@@ -5,6 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "mlflow.labels" . | nindent 4 }}
+  annotations:
+    cloud.google.com/backend-config: '{"ports": {"http": "{{ include "mlflow.fullname" . }}-backend-config"}}'
 spec:
   type: {{ .Values.service.type }}
   ports:

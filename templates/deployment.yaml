@@ -81,8 +81,6 @@ spec:
               value: {{ .Values.mysql.port | quote }}
             - name: DB_NAME
               value: {{ .Values.mysql.db }}
-            - name: MLFLOW_AUTH_CONFIG_PATH
-              value: /etc/auth/basic.ini
           command: ["mlflow", "server"]
           args:
             - "--host"
@@ -93,8 +91,6 @@ spec:
             - "$(BUCKET)"
             - "--backend-store-uri"
             - "mysql+pymysql://$(DB_USER):$(DB_PW)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
-            - "--app-name"
-            - "basic-auth"
           livenessProbe:
             httpGet:
               path: /
@@ -103,15 +99,8 @@ spec:
             httpGet:
               path: /
               port: {{ .Values.mlflowPort }}
-          volumeMounts:
-          - name: auth-config
-            mountPath: /etc/auth
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      volumes:
-      - name: auth-config
-        configMap:
-          name: {{ include "mlflow.fullname" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
