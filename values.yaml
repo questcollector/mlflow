@@ -61,10 +61,6 @@ service:
   type: ClusterIP
   port: 80
 
-istio:
-  # istio를 사용하는 경우 VirtualService, AuthorizationPolicy 생성
-  enabled: false
-
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little

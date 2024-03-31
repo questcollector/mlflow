@@ -1,4 +1,3 @@
-{{- if ne .Values.istio.enabled true -}}
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
@@ -55,4 +54,3 @@ spec:
                 name: {{ include "mlflow.fullname" . }}
                 port:
                   number: {{ .Values.service.port }}
-{{- end -}}
